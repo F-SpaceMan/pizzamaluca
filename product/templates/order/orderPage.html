@@ -1,0 +1,19 @@
+{%extends 'base.html'%}
+
+{% block title %}Order{% endblock %}
+
+{% block content %}
+    <ul class="list-group">
+        {% for pizza in allPizza %}
+            <li class="list-group-item">{{pizza.description}}</li>
+        {% endfor %}
+
+        {% for drink in allDrink %}
+            <li class="list-group-item">{{drink.description}}</li>
+        {% endfor %}
+
+        {% for combo in allCombo %}
+            <li class="list-group-item">{{combo.description}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

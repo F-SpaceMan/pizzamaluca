@@ -1,0 +1,9 @@
+{%extends 'base.html'%}
+
+{% block title %}Menu{% endblock %}
+
+{% block content %}
+    <ul class="list-group">
+        <li class="list-group-item"><a href="{% url 'clear_cart'}">Esvaziar Carrinho</a>{{pizza.description}}</li>
+
+{% endblock %}
