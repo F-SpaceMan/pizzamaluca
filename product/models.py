@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
 # Create your models here.
 
@@ -90,14 +91,15 @@ class Order(models.Model):
 
 class Cart(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE,blank=True, null=True)
+    user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return f'Cart for {self.user.name}'
+        return f'Cart for {self.user.username}'
     
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
     pizza = models.ForeignKey(Pizza, on_delete=models.CASCADE, null=True, blank=True)
     drink = models.ForeignKey(Drink, on_delete=models.CASCADE, null=True, blank=True)
     combo = models.ForeignKey(Combo, on_delete=models.CASCADE, null=True, blank=True)
@@ -113,6 +115,16 @@ class CartItem(models.Model):
             return self.combo.description
         return ''
     
+    @property
+    def item_id(self):
+        if self.pizza:
+            return self.pizza.id
+        elif self.drink:
+            return self.drink.id
+        elif self.combo:
+            return self.combo.id
+        return ''
+
     def __str__(self) -> str:
         return f"{self.quantity} x {self.item_name}"
     

@@ -1,9 +1,48 @@
-{%extends 'base.html'%}
-
-{% block title %}Menu{% endblock %}
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Cart{% endblock %}
 
 {% block content %}
-    <ul class="list-group">
-        <li class="list-group-item"><a href="{% url 'clear_cart'}">Esvaziar Carrinho</a>{{pizza.description}}</li>
+
+<div>
+    <h4>Eae {{user.username}}</h4>
+</div>
+
+<form id="cart-form" method="POST">
+    {% csrf_token %}
+
+    <form id="cart-form" method="POST">
+        {% csrf_token %}
+    
+        {% for pizza in form.pizza %}
+            <input type="checkbox" name="{{ pizza.name }}" value="{{ pizza.value }}" id="{{ pizza.id_for_label }}">
+            <label for="{{ pizza.id_for_label }}">{{ pizza.choice_label }}</label>
+            <br>
+        {% endfor %}
+        
+        {% for drink in form.drink %}
+            <input type="checkbox" name="{{ drink.name }}" value="{{ drink.value }}" id="{{ drink.id_for_label }}">
+            <label for="{{ drink.id_for_label }}">{{ drink.choice_label }}</label>
+            <br>
+        {% endfor %}
+        
+        {% for combo in form.combo %}
+            <input type="checkbox" name="{{ combo.name }}" value="{{ combo.value }}" id="{{ combo.id_for_label }}">
+            <label for="{{ combo.id_for_label }}">{{ combo.choice_label }}</label>
+            <br>
+        {% endfor %}
+        
+        {% for field in form %}
+            {% if field.name in form.item_quantity_fields %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                <br>
+            {% endif %}
+        {% endfor %}
+    
+        <input type="submit" class="btn btn-success" value="Fazer Pedido">
+    </form>
+    
+</form>
 
 {% endblock %}

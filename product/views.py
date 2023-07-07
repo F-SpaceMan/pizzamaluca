@@ -1,42 +1,19 @@
 from django.shortcuts import render, redirect
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
-from django.http import HttpResponse
+from django.views.generic import TemplateView
 from .models import Pizza, Drink, Combo, Order, Cart
 from django.shortcuts import get_object_or_404
 from .forms import CartForm
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# class ProductController(View):
-#     def getAllPizza(request):
-#         return render(
-#             request,
-#             'product/menuPage.html',
-#             {
-#                 'allPizza':Pizza.objects.all(),
-#             }
-#         )
-#     def getAllDrinks(request):
-#         return render(
-#             request,
-#             'product/menuPage.html',
-#             {
-#                 'allDrink':Drink.objects.all(),
-#             }
-#         )
-#     def getAllCombo(request):
-#         return render(
-#             request,
-#             'product/menuPage.html',
-#             {
-#                 'allCombo':Combo.objects.all(),
-#             }
-#         )
 
 class ProducService(View):
     def calculatePizzaPrice(request):
@@ -89,15 +66,18 @@ def getTotalOfProductsOrder(request):
 def getOrderList(request):
     return None
 
-# def getCart(request, userid):
-#     cart = get_object_or_404(Cart, user.cpf=userid)
-#     return render(request, 'product/cartPage.html', {'cart':cart})
 
+@method_decorator(login_required, name='dispatch')
+class MainView(TemplateView):
+    template_name = 'main/mainPage.html'
+
+
+@method_decorator(login_required, name='dispatch')
 class CartView(CreateView):
     model = Cart
     form_class = CartForm
     template_name = 'product/menuPage.html'
-    success_url = reverse_lazy('menu_page')
+    success_url = reverse_lazy('cart_page')
 
     def get_form_kwargs(self):
         """ Passes the request object to the form class.
@@ -107,40 +87,26 @@ class CartView(CreateView):
         kwargs['request'] = self.request
         return kwargs
     
-# def newCart(request):
-#     logger = logging.getLogger(__name__)
+@method_decorator(login_required, name='dispatch')
+class ClosedCartView(CreateView):
+    model = Cart
+    form_class = CartForm
+    template_name = 'order/cartPage.html'
+    success_url = reverse_lazy('cart_page')
 
-#     if request.method == 'POST':
-#         form = CartForm(request.POST)
-        
-#         if form.is_valid():
-#             cart = form.save(commit=False)
-#             cart.user = None
-#             cart.pizza_quantity = form.cleaned_data['pizza_quantity']
-#             cart.drink_quantity = form.cleaned_data['drink_quantity']
-#             cart.combo_quantity = form.cleaned_data['combo_quantity']
-#             cart.save()
+    def get_form_kwargs(self):
+        """ Passa o objeto request object a classe de form
+         Para mostrar apenas pedidos que pertencem ao user autenticado"""
 
-#             # Add selected pizzas, drinks, and combos to the ManyToMany fields
-#             cart.pizza.set(form.cleaned_data['pizza'])
-#             cart.drink.set(form.cleaned_data['drink'])
-#             cart.combo.set(form.cleaned_data['combo'])
-
-#             # Redirect to the success page or do something else
-#             return redirect('menu_page')
-#         else:
-#             # Form is not valid, handle the error
-#             logger.debug(form)
-#             logger.error("Invalid form data: %s", form.errors)
-#     else:
-#         form = CartForm()
-
-#     return render(request, 'product/menuPage.html', {'form': form})
-
+        kwargs = super(ClosedCartView, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+    
 
 # def clearCar(request):
 #     del request.session['cart']
 #     return redirect('cart_cleared')
+
 # def product(request):
 #     return HttpResponse('Hello World!')
 

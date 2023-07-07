@@ -1,21 +1,21 @@
 {%extends 'base.html'%}
 {% load crispy_forms_tags %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Sign Up{% endblock %}
 
 {% block content %}
 <div class="row">
 <div class="mb-3 ">
     <div class="card offset-md-4" style="width: 23rem;">
         <div class="card-body">
-            <h4 class="card-title text-center">Entrar</h4>
+            <h4 class="card-title text-center">Cadastrar</h4>
             <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ next }}">
 
                 {{ form|crispy }}
                 <br>
-                <button type="submit" class="btn btn-primary btn block">Entrar</button>
+                <button type="submit" class="btn btn-primary btn block">Cadastrar</button>
             
             </form>
         </div>

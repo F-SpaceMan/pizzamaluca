@@ -2,29 +2,15 @@
 {% load crispy_forms_tags %}
 {% block title %}Menu{% endblock %}
 
-
 {% block content %}
+
+<div>
+    <h4>Eae {{user.username}}</h4>
+</div>
 
 <form id="cart-form" method="POST">
     {% csrf_token %}
     {{ form|crispy }}
-    <!-- {% for pizza in form.pizza %}
-        {{ pizza }}
-    {% endfor %}
-
-    {{ form.pizza_quantity }}
-
-    {% for drink in form.drink %}
-        {{ drink }}
-    {% endfor %}
-
-    {{ form.drink_quantity }}
-    
-    {% for combo in form.combo %}
-        {{ combo }}
-    {% endfor %}
-
-    {{ form.combo_quantity }} -->
 
     <input type="submit" class="btn btn-success" value="Confirmar">
 </form>
