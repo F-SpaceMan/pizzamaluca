@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from accounts.models import UserProfile
+
 
 # Create your models here.
 
@@ -61,28 +63,10 @@ class Combo(Product):
     def __str__(self):
         return f'{self.id}'
 
-class Address(models.Model):
-    street = models.TextField()
-    number = models.IntegerField()
-    zipCode = models.BigIntegerField()
-    neighborhood = models.TextField()
-
-class Name(models.Model):
-    firstName = models.TextField()
-    middleName = models.TextField()
-    lastName = models.TextField()
-
-class User(models.Model):
-    cpf = models.BigIntegerField(primary_key=True)
-    telephoneNumber = models.TextField()
-    email = models.TextField()
-    address = models.ForeignKey(Address, on_delete=models.CASCADE)
-    name =  models.ForeignKey(Name, on_delete=models.CASCADE)
-    password = models.TextField()
 
 class Order(models.Model):
     id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE)
     itemList = models.ManyToManyField(Product)
 
     def __str__(self):

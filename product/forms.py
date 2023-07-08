@@ -4,6 +4,7 @@ from .models import Pizza, Drink, Combo,  Cart, CartItem
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 
+
 from django.forms import formset_factory
 
 import logging
@@ -127,7 +128,8 @@ class CartForm(forms.ModelForm):
                 quantity_fields[field_id] = self.cleaned_data.get(field_id)
         return quantity_fields
     
-    
+
+
 # class CartForm(forms.ModelForm):
 #     global checked_pizza, checked_drink, checked_combo
 
