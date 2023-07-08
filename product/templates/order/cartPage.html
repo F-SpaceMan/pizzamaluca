@@ -8,41 +8,67 @@
     <h4>Eae {{user.username}}</h4>
 </div>
 
-<form id="cart-form" method="POST">
-    {% csrf_token %}
 
-    <form id="cart-form" method="POST">
-        {% csrf_token %}
-    
-        {% for pizza in form.pizza %}
-            <input type="checkbox" name="{{ pizza.name }}" value="{{ pizza.value }}" id="{{ pizza.id_for_label }}">
-            <label for="{{ pizza.id_for_label }}">{{ pizza.choice_label }}</label>
-            <br>
-        {% endfor %}
+    <div class="card">
+
+        <div class="card-header text-center">
+            Carrinho
+        </div>
+
+        <form id="cart-form" method="POST">
+            {% csrf_token %}
         
-        {% for drink in form.drink %}
-            <input type="checkbox" name="{{ drink.name }}" value="{{ drink.value }}" id="{{ drink.id_for_label }}">
-            <label for="{{ drink.id_for_label }}">{{ drink.choice_label }}</label>
-            <br>
-        {% endfor %}
-        
-        {% for combo in form.combo %}
-            <input type="checkbox" name="{{ combo.name }}" value="{{ combo.value }}" id="{{ combo.id_for_label }}">
-            <label for="{{ combo.id_for_label }}">{{ combo.choice_label }}</label>
-            <br>
-        {% endfor %}
-        
-        {% for field in form %}
-            {% if field.name in form.item_quantity_fields %}
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                <br>
-            {% endif %}
-        {% endfor %}
+            <div class="card-body">
+
+                <ul class="list-group list-group-flush">
+                    {% for pizza in form.pizza %}
+                    <li class="list-group-item">
+                        {{ pizza }}
+                    </li>
+                    {% endfor %}
+                    
+                    {% for drink in form.drink %}
+                    <li class="list-group-item">
+                        {{ drink }}
+                    </li>
+                    {% endfor %}
+                    {% for combo in form.combo %}
+                    <li class="list-group-item">
+                        {{ combo }}
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <ul class="list-group list-group-flush"></ul>
+                {% for field in form %}
+                    {% if field.name in form.item_quantity_fields %}
+                        <li class="list-group-item">
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text" id="{{ field.id_for_label }}">{{ field.label }}</span>
+                                {{ field }}
+                            </div>
+                        </li>
+                        <!-- <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        <br> -->
+                    {% endif %}
+                {% endfor %}
+
+                </ul>
+
+     
+            </div>
+            
+            <div class="card-footer text-center">
+                <input type="submit" class="btn btn-success " style="width: 18rem;" value="Fazer Pedido">
+            </div>
+        </form>
     
-        <input type="submit" class="btn btn-success" value="Fazer Pedido">
-    </form>
-    
-</form>
+        <div class="card-footer text-center text-body-secondary">
+          Fechando seu pedido
+        </div>
+      </div>
+
+
 
 {% endblock %}

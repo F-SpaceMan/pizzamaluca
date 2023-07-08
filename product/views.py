@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.views.generic.base import View
+from django.views.generic.base import View, RedirectView
 from django.views.generic.edit import CreateView
 from django.views.generic import TemplateView
-from .models import Pizza, Drink, Combo, Order, Cart
+from .models import Pizza, Drink, Combo, Order, Cart, OrderItem
 from django.shortcuts import get_object_or_404
-from .forms import CartForm
+from .forms import CartForm, ClosedCartForm
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -73,7 +73,7 @@ class MainView(TemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
-class CartView(CreateView):
+class MenuView(CreateView):
     model = Cart
     form_class = CartForm
     template_name = 'product/menuPage.html'
@@ -83,14 +83,14 @@ class CartView(CreateView):
         """ Passes the request object to the form class.
          This is necessary to only display members that belong to a given user"""
 
-        kwargs = super(CartView, self).get_form_kwargs()
+        kwargs = super(MenuView, self).get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
     
 @method_decorator(login_required, name='dispatch')
 class ClosedCartView(CreateView):
     model = Cart
-    form_class = CartForm
+    form_class = ClosedCartForm
     template_name = 'order/cartPage.html'
     success_url = reverse_lazy('cart_page')
 
@@ -102,6 +102,25 @@ class ClosedCartView(CreateView):
         kwargs['request'] = self.request
         return kwargs
     
+@method_decorator(login_required, name='dispatch')
+class OrderView(TemplateView):
+    template_name = 'order/orderPage.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["orders"] = Order.objects.all().filter(user = self.request.user)
+        return context
+
+    
+@method_decorator(login_required, name='dispatch')
+class OrderViewDetail(TemplateView):
+    template_name = 'order/orderPageDetail.html'
+    # url = reverse_lazy('order_detail_page')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["items"] = OrderItem.objects.all().filter(order = get_object_or_404(Order, pk=kwargs["orderid"]))
+        return context
 
 # def clearCar(request):
 #     del request.session['cart']

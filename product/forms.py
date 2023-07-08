@@ -1,6 +1,6 @@
 from django import forms
 from django_filters import BooleanFilter
-from .models import Pizza, Drink, Combo,  Cart, CartItem
+from .models import Pizza, Drink, Combo,  Cart, CartItem, Order, OrderItem
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 
@@ -102,11 +102,14 @@ class CartForm(forms.ModelForm):
         self.create_cart_items(cart, 'drink')
         self.create_cart_items(cart, 'combo')
 
+        logger.debug([s for s in self.cleaned_data])
+
         return cart
 
 
     def create_cart_items(self, cart, field_name):
         selected_items = self.cleaned_data[field_name]
+        
         quantity_fields = self.get_quantity_fields(field_name)
 
         for item in selected_items:
@@ -127,129 +130,53 @@ class CartForm(forms.ModelForm):
                 quantity_fields[field_id] = self.cleaned_data.get(field_id)
         return quantity_fields
     
-    
-# class CartForm(forms.ModelForm):
-#     global checked_pizza, checked_drink, checked_combo
 
-#     checked_pizza = []
-#     checked_combo = []
-#     checked_drink = []
-    
-#     class Meta:
-#         model = Cart
-#         fields = ('pizza', 'drink', 'combo')
-
-#     def __init__(self, *args, **kwargs):
-
-#         checked_pizza = []
-#         checked_combo = []
-#         checked_drink = []
-
-#         self.request = kwargs.pop('request', None)
-
-#         super(CartForm, self).__init__(*args, **kwargs)
-        
-        
-#         checked = [_ for _ in CartItem.objects.filter(
-#             user = self.request.user
-#         )]
-
-#         logger.debug('chek')
-
-#         logger.debug([_ for _ in checked])
-
-
-#         for pizza in Pizza.objects.all():
-#             if pizza.id in [_.item_id for _ in checked]:
-#                 logger.debug(pizza)
-#                 checked_pizza.append(pizza.id)
-#             self.fields[f'pizza_{pizza.id}_quantity'] = forms.IntegerField(
-#                 label=pizza.description,
-#                 min_value=1,
-#                 initial=1,
-#                 required=False
-#             )
-
-#         for drink in Drink.objects.all():
-#             if drink.id in [_.item_id for _ in checked]:
-#                 logger.debug(drink)
-#                 checked_drink.append(drink.id)
-#             self.fields[f'drink_{drink.id}_quantity'] = forms.IntegerField(
-#                 label=drink.description,
-#                 min_value=1,
-#                 initial=1,
-#                 required=False
-#             )
-
-#         for combo in Combo.objects.all():
-#             if combo.id in [_.item_id for _ in checked]:
-#                 logger.debug(combo)
-#                 checked_combo.append(combo.id)
-#             self.fields[f'combo_{combo.id}_quantity'] = forms.IntegerField(
-#                 label=combo.description,
-#                 min_value=1,
-#                 initial=1,
-#                 required=False
-#             )
-
-#     # pizza_quantity = forms.IntegerField(min_value=1, initial=1,required=False)
-#     # drink_quantity = forms.IntegerField(min_value=1, initial=1,required=False)
-#     # combo_quantity = forms.IntegerField(min_value=1, initial=1,required=False)
-
-#     pizza = forms.ModelMultipleChoiceField(
-#         initial=checked_pizza,
-#         queryset=Pizza.objects.all(),
-#         widget=forms.CheckboxSelectMultiple,
-#         required=False
-#     )
-
-#     drink = forms.ModelMultipleChoiceField(
-#         initial=checked_drink,
-#         queryset=Drink.objects.all(),
-#         widget=forms.CheckboxSelectMultiple,
-#         required=False
-#     )
-#     combo = forms.ModelMultipleChoiceField(
-#         initial=checked_combo,
-#         queryset=Combo.objects.all(),
-#         widget=forms.CheckboxSelectMultiple,
-#         required=False
-#     )
-
-#     def save(self, commit=True):
-#         cart = super(CartForm, self).save(commit=False)
-#         if self.request.user.is_authenticated:
-#             cart.user = self.request.user
-#         if commit:
-#             cart.save()
-
-#         # Clear existing cart items for the current user
-#         CartItem.objects.filter(user=self.request.user).delete()
-
-#         for field_name, field_value in self.cleaned_data.items():
-#             if field_name.startswith('pizza_') and field_value:
-#                 item_id = field_name.split('_')[1]
-#                 quantity = field_value
-#                 pizza = get_object_or_404(Pizza, id=item_id)
-#                 CartItem.objects.create(user=self.request.user, pizza=pizza, quantity=quantity)
-
-#             elif field_name.startswith('drink_') and field_value:
-#                 item_id = field_name.split('_')[1]
-#                 quantity = field_value
-#                 drink = get_object_or_404(Drink, id=item_id)
-#                 CartItem.objects.create(user=self.request.user, drink=drink, quantity=quantity)
-
-#             elif field_name.startswith('combo_') and field_value:
-#                 item_id = field_name.split('_')[1]
-#                 quantity = field_value
-#                 combo = get_object_or_404(Combo, id=item_id)
-#                 CartItem.objects.create(user=self.request.user, combo=combo, quantity=quantity)
-
-#         return cart
+class ClosedCartForm(CartForm):
 
     # def __init__(self, *args, **kwargs):
-    #     super(CartForm, self).__init__(*args, **kwargs)
-    #     self.fields['user'].required = False
-    #     self.fields['pizza'].required = False
-    #     self.fields['drink'].required = False
-    #     self.fields['combo'].required = False
+    #     super().__init__(*args, **kwargs)
+    def save(self, commit=True):
+        if self.request.user.is_authenticated:
+            user = self.request.user
+
+            order = Order.objects.create(user=user)
+            OrderItem.objects.filter(order=order).delete()
+            
+        else:
+            # Handle anonymous user cart logic here
+            return None
+
+        
+        self.instance = order
+
+        super(ClosedCartForm, self).save(commit=commit)
+
+        self.create_order_item(order, 'pizza')
+        self.create_order_item(order, 'drink')
+        self.create_order_item(order, 'combo')
+
+        Cart.objects.filter(user=self.request.user).delete()
+
+        return order
+
+
+    def create_order_item(self, order, field_name):
+        selected_items = self.cleaned_data[field_name]
+        
+        quantity_fields = self.get_quantity_fields(field_name)
+
+        for item in selected_items:
+            quantity_field = quantity_fields.get(f'{field_name}_{item.id}_quantity')
+            if quantity_field is not None and isinstance(quantity_field, int) and quantity_field > 0:
+                logging.debug('\n\n\n\n')
+                logging.debug(order)
+                logging.debug(item)
+                logging.debug(quantity_field)
+                logging.debug(order)
+                logging.debug('\n\n\n\n')
+                
+                OrderItem.objects.create(
+                    order=order,
+                    **{field_name: item},
+                    quantity=quantity_field
+                )

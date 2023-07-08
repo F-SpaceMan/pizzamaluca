@@ -3,12 +3,15 @@
 {% block title %}Order{% endblock %}
 
 {% block content %}
+
+<p>oioi</p>
+<div class="card-body">
     <ul class="list-group">
-        {% for order in orders %}
+        {% for item in items %}
             <li class="list-group-item">
-                <a href="{% url 'order_detail_page' order.id %}"> {{order}} </a>
-                 
+                {{item}}
             </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}

@@ -54,12 +54,20 @@ class Item(models.Model):
     def __str__(self) -> str:
         return f"{self.quantity} x {self.item_name}"
     
+    
 class Combo(Product):
     item = models.ManyToManyField(Item)
-    total = models.FloatField()
+
+    @property
+    def combo_name(self):
+        c_name = ''
+        for _ in self.item.all():
+            c_name = f'{_} + {c_name}'
+        
+        return c_name[:len(c_name)-2]
 
     def __str__(self):
-        return f'{self.id}'
+        return f'{self.combo_name}'
 
 class Address(models.Model):
     street = models.TextField()
@@ -80,14 +88,45 @@ class User(models.Model):
     name =  models.ForeignKey(Name, on_delete=models.CASCADE)
     password = models.TextField()
 
+    
+
 class Order(models.Model):
-    id = models.IntegerField(primary_key=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    itemList = models.ManyToManyField(Product)
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    # itemList = models.ManyToManyField(OrderItem)
 
     def __str__(self):
-        return f'{self.id} - {self.itemList}'
+        return f'{self.id} - {self.user.username}'
     
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    pizza = models.ForeignKey(Pizza, on_delete=models.CASCADE, null=True, blank=True)
+    drink = models.ForeignKey(Drink, on_delete=models.CASCADE, null=True, blank=True)
+    combo = models.ForeignKey(Combo, on_delete=models.CASCADE, null=True, blank=True)
+    quantity = models.IntegerField()
+
+    @property
+    def item_name(self):
+        if self.pizza:
+            return self.pizza.description
+        elif self.drink:
+            return self.drink.description
+        elif self.combo:
+            return self.combo.description
+        return ''
+    
+    @property
+    def item_id(self):
+        if self.pizza:
+            return self.pizza.id
+        elif self.drink:
+            return self.drink.id
+        elif self.combo:
+            return self.combo.id
+        return ''
+
+    def __str__(self) -> str:
+        return f"{self.quantity} x {self.item_name}"
 
 class Cart(models.Model):
     id = models.AutoField(primary_key=True)
