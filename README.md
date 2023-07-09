@@ -3,7 +3,7 @@
 -----------
 ### Alunos:
 
-  FILIPE PEREIRA BICALHO (https://github.com/F-SpaceMan) - 20203015739
+  FILIPE PEREIRA LIMA BICALHO (https://github.com/F-SpaceMan) - 20203015739
 
   FRANCISCO ABREU GONCALVES (https://github.com/Francis1408) - 20193002285
 
