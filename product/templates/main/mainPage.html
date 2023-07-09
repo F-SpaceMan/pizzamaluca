@@ -7,45 +7,45 @@
     <h4>Eae {{user.username}}</h4>
 </div>
 
+<div class="container" >
+  <div class="row">
+    <div class="col-sm-6 mb-3 mb-sm-0">
+      <div class="card text-center" style="width: 25rem;">
+        <img src="{% static 'img/menu.jpg' %}" class="rounded ">
+      
+        <div class="card-body">
+          <a href="/menu" class="btn btn-primary">Ver o menu</a>
+        </div>
+      </div>
 
-<div class="row">
-  <div class="col-sm-6 mb-3 mb-sm-0">
-    <div class="card text-center" style="width: 25rem;">
-      <img src="{% static 'img/menu.jpg' %}" class="rounded ">
-    
-      <div class="card-body">
-        <a href="/menu" class="btn btn-primary">Ver o menu</a>
+      <div class="card text-center" style="width: 25rem;">
+        <img src="{% static 'img/carrim.jpg' %}" class="rounded">
+      
+        <div class="card-body">
+          <a href="/cart" class="btn btn-primary">Carrinho</a>
+        </div>
       </div>
     </div>
 
-    <div class="card text-center" style="width: 25rem;">
-      <img src="{% static 'img/carrim.jpg' %}" class="rounded">
-    
-      <div class="card-body">
-        <a href="/cart" class="btn btn-primary">Carrinho</a>
+    <div class="col-sm-6">
+      <div class="card text-center" style="width: 25rem;">
+        <img src="{% static 'img/order.jpg' %}" class="rounded">
+      
+        <div class="card-body">
+          <a href="/order" class="btn btn-primary">Pedidos</a>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <div class="col-sm-6">
-    <div class="card text-center" style="width: 25rem;">
-      <img src="{% static 'img/order.jpg' %}" class="rounded">
-    
-      <div class="card-body">
-        <a href="/order" class="btn btn-primary">Pedidos</a>
+      
+      <div class="card text-center" style="width: 25rem;">
+        <img src="{% static 'img/user.jpg' %}" class="rounded">
+      
+        <div class="card-body">
+          <a href="#" class="btn btn-primary">Usuário</a>
+        </div>
       </div>
+      
     </div>
-    
-    <div class="card text-center" style="width: 25rem;">
-      <img src="{% static 'img/user.jpg' %}" class="rounded">
-    
-      <div class="card-body">
-        <a href="#" class="btn btn-primary">Usuário</a>
-      </div>
-    </div>
-    
   </div>
 </div>
-
 
 {% endblock %}

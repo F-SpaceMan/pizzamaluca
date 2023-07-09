@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
+from django.conf import settings
 
 # Create your models here.
 
@@ -26,11 +27,20 @@ class Pizza(Product):
 
     tastes = models.ManyToManyField(Taste)
 
+    @property
+    def i_price(self):
+        return self.price
+
     def __str__(self):
         return f'{self.description} - {[_.taste_name for _ in self.tastes.all()]}' 
 
 class Drink(Product):
     volume = models.FloatField()
+
+    @property
+    def i_price(self):
+        return self.price
+       
 
     def __str__(self):
         return f'{self.description} - {self.volume} l' 
@@ -59,6 +69,10 @@ class Combo(Product):
     item = models.ManyToManyField(Item)
 
     @property
+    def i_price(self):
+        return self.price
+
+    @property
     def combo_name(self):
         c_name = ''
         for _ in self.item.all():
@@ -69,31 +83,11 @@ class Combo(Product):
     def __str__(self):
         return f'{self.combo_name}'
 
-class Address(models.Model):
-    street = models.TextField()
-    number = models.IntegerField()
-    zipCode = models.BigIntegerField()
-    neighborhood = models.TextField()
 
-class Name(models.Model):
-    firstName = models.TextField()
-    middleName = models.TextField()
-    lastName = models.TextField()
-
-class User(models.Model):
-    cpf = models.BigIntegerField(primary_key=True)
-    telephoneNumber = models.TextField()
-    email = models.TextField()
-    address = models.ForeignKey(Address, on_delete=models.CASCADE)
-    name =  models.ForeignKey(Name, on_delete=models.CASCADE)
-    password = models.TextField()
-
-    
 
 class Order(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
-    # itemList = models.ManyToManyField(OrderItem)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f'{self.id} - {self.user.username}'
@@ -124,13 +118,24 @@ class OrderItem(models.Model):
         elif self.combo:
             return self.combo.id
         return ''
+    
+    @property
+    def total_value(self):
+        if self.pizza:
+            return self.pizza.price * self.quantity
+        elif self.drink:
+            return self.drink.price * self.quantity
+        elif self.combo:
+            return self.combo.price * self.quantity
+        return ''
 
     def __str__(self) -> str:
         return f"{self.quantity} x {self.item_name}"
 
 class Cart(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
+    # user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return f'Cart for {self.user.username}'
@@ -138,7 +143,8 @@ class Cart(models.Model):
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
+    # user = models.ForeignKey(get_user_model(),on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     pizza = models.ForeignKey(Pizza, on_delete=models.CASCADE, null=True, blank=True)
     drink = models.ForeignKey(Drink, on_delete=models.CASCADE, null=True, blank=True)
     combo = models.ForeignKey(Combo, on_delete=models.CASCADE, null=True, blank=True)
@@ -168,10 +174,3 @@ class CartItem(models.Model):
         return f"{self.quantity} x {self.item_name}"
     
     
-
-    # pizza = models.ManyToManyField(Pizza,blank=True, null=True)
-    # drink = models.ManyToManyField(Drink,blank=True, null=True)
-    # combo = models.ManyToManyField(Combo,blank=True, null=True)
-    # pizza_quantity = models.IntegerField(Product,blank=True, null=True)
-    # drink_quantity = models.IntegerField(Product,blank=True, null=True)
-    # combo_quantity = models.IntegerField(Product,blank=True, null=True)
